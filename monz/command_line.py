@@ -142,25 +142,18 @@ def transactions(ctx, account_id, num):
         raise click.ClickException(str(e))
 
     for n, transaction in enumerate(monzo_transactions, start=1):
-        # We need a separate request for better merchant info
-        trans = ctx.obj.transaction(
-            transaction_id=transaction.id,
-            expand_merchant=True,
-        )
-        merchant = trans.merchant
-
+        merchant = transaction.merchant
         if isinstance(merchant, MonzoMerchant):
-            description = '{0} ({1})'.format(
-                merchant.name,
-                merchant.address['city'].capitalize(),
+            description = '{0} {1}'.format(
+                merchant.emoji, merchant.name
             )
         else:
-            description = trans.description.split('  ')[0].capitalize()
+            description = transaction.description.split('  ')[0].capitalize()
 
-        category = trans.category.replace('_', ' ').capitalize()
+        category = merchant.category.replace('_', ' ').capitalize()
 
-        amount = monzo_amount_to_dec(trans.local_amount)
-        local_amount = format_currency(amount, trans.local_currency)
+        amount = monzo_amount_to_dec(transaction.local_amount)
+        local_amount = format_currency(amount, transaction.local_currency)
 
         click.secho(
             '{0} | {1}'.format(local_amount, description),
