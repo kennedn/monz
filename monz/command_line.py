@@ -48,8 +48,10 @@ def info(ctx):
 def pots(ctx, account_id):
     """Show connected Monzo pots"""
     monzo_pots = ctx.obj.pots(current_account_id=account_id)
+    # Remove deleted pots
+    monzo_pots = [pot for pot in monzo_pots if not pot.deleted]
 
-    for n, pot in enumerate([pot for pot in monzo_pots if not pot.deleted], start=1):
+    for n, pot in enumerate(monzo_pots, start=1):
         click.secho(
             "Account #{}, {}".format(n, pot.name),
             fg='green',
