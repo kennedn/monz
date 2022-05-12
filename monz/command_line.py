@@ -42,6 +42,36 @@ def info(ctx):
     # and it's latest transaction
     ctx.invoke(transactions, num=1)
 
+@cli.command()
+@click.option('--account-id', '-a', type=str, help="Monzo account ID.")
+@click.pass_context
+def pots(ctx, account_id):
+    """Show connected Monzo pots"""
+    monzo_pots = ctx.obj.pots(current_account_id=account_id)
+
+    for n, pot in enumerate([pot for pot in monzo_pots if not pot.deleted], start=1):
+        click.secho(
+            "Account #{}, {}".format(n, pot.name),
+            fg='green',
+        )
+        pot_balance = format_currency(
+            monzo_amount_to_dec(pot.balance), pot.currency
+        )
+
+        click.secho(
+            '{0:<12} {1}'.format('Balance:', pot_balance)
+        )
+        click.echo(
+            '{0:<12} {1}'.format('ID:', pot.id)
+        )
+        click.echo(
+            '{0:<12} {1:%b %-d, %Y %-I:%M %p}'.format(
+                'Created:', pot.created,
+            )
+        )
+
+        if n != len(monzo_pots):
+            click.echo()  # Print a new line between accounts
 
 @cli.command()
 @click.pass_context
@@ -81,7 +111,7 @@ def balance(ctx, account_id):
     local_amount = format_currency(amount, monzo_balance.currency)
 
     local_spent_today = format_currency(
-        monzo_balance.spend_today, monzo_balance.currency
+        monzo_amount_to_dec(monzo_balance.spend_today), monzo_balance.currency
     )
 
     click.secho(
@@ -149,3 +179,7 @@ def transactions(ctx, account_id, num):
 
         if n != len(monzo_transactions):
             click.echo()  # Print a new line between transactions
+
+
+if __name__ == '__main__':
+    cli()
