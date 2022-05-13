@@ -143,6 +143,7 @@ def transactions(ctx, account_id, num):
 
     for n, transaction in enumerate(monzo_transactions, start=1):
         merchant = transaction.merchant
+        category = None
         if isinstance(merchant, MonzoMerchant):
             description = '{0} {1}'.format(
                 merchant.name, merchant.emoji
@@ -159,7 +160,7 @@ def transactions(ctx, account_id, num):
             '{0} | {1}'.format(local_amount, description),
             fg='yellow', bold=True,
         )
-        if isinstance(merchant, MonzoMerchant):
+        if category is not None:
           click.echo(
               '{0:<12} {1}'.format('Category:', category)
           )
