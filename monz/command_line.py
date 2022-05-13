@@ -145,12 +145,12 @@ def transactions(ctx, account_id, num):
         merchant = transaction.merchant
         if isinstance(merchant, MonzoMerchant):
             description = '{0} {1}'.format(
-                merchant.emoji, merchant.name
+                merchant.name, merchant.emoji
             )
+            category = merchant.category.replace('_', ' ').capitalize()
         else:
             description = transaction.description.split('  ')[0].capitalize()
 
-        category = merchant.category.replace('_', ' ').capitalize()
 
         amount = monzo_amount_to_dec(transaction.local_amount)
         local_amount = format_currency(amount, transaction.local_currency)
@@ -159,9 +159,10 @@ def transactions(ctx, account_id, num):
             '{0} | {1}'.format(local_amount, description),
             fg='yellow', bold=True,
         )
-        click.echo(
-            '{0:<12} {1}'.format('Category:', category)
-        )
+        if isinstance(merchant, MonzoMerchant):
+          click.echo(
+              '{0:<12} {1}'.format('Category:', category)
+          )
 
         if transaction.notes:  # pragma: no cover
             click.echo('{0:<12} {1}'.format('Notes:', transaction.notes))
